@@ -69,8 +69,8 @@ cp .env.example .env
 cat > ~/PCWake/.env << 'EOF'
 BOT_TOKEN=токен_от_BotFather
 ALLOWED_USER_ID=твой_user_id
-PC_MAC=00-D8-61-15-44-5B
-PC_IP=192.168.0.101
+PC_MAC=хх-хх-хх-хх-хх-хх
+PC_IP=192.ххх.х.ххх
 EOF
 ```
 
