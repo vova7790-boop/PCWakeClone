@@ -46,14 +46,11 @@ def send_wol(mac: str) -> None:
 
 
 def is_online(ip: str) -> bool:
-    # Проверяем несколько портов — хотя бы один должен отвечать когда Windows загружена
-    for port in (445, 135, 139):
-        try:
-            with socket.create_connection((ip, port), timeout=1):
-                return True
-        except OSError:
-            continue
-    return False
+    try:
+        with socket.create_connection((ip, 7779), timeout=2):
+            return True
+    except OSError:
+        return False
 
 
 @authorized_only
