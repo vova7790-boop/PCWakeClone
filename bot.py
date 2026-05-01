@@ -46,14 +46,14 @@ def send_wol(mac: str) -> None:
 
 
 def is_online(ip: str) -> bool:
-    # Подключаемся к SMB и ждём ответных байт — требует полностью загруженной Windows
-    try:
-        with socket.create_connection((ip, 445), timeout=2) as s:
-            s.settimeout(2)
-            data = s.recv(4)
-            return len(data) > 0
-    except OSError:
-        return False
+    # Проверяем несколько портов — хотя бы один должен отвечать когда Windows загружена
+    for port in (445, 135, 139):
+        try:
+            with socket.create_connection((ip, port), timeout=1):
+                return True
+        except OSError:
+            continue
+    return False
 
 
 @authorized_only
