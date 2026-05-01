@@ -46,10 +46,12 @@ def send_wol(mac: str) -> None:
 
 
 def is_online(ip: str) -> bool:
-    # Порт 445 (SMB) активен только когда Windows полностью загружена
+    # Подключаемся к SMB и ждём ответных байт — требует полностью загруженной Windows
     try:
-        with socket.create_connection((ip, 445), timeout=2):
-            return True
+        with socket.create_connection((ip, 445), timeout=2) as s:
+            s.settimeout(2)
+            data = s.recv(4)
+            return len(data) > 0
     except OSError:
         return False
 
