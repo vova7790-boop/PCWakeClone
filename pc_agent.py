@@ -1,21 +1,22 @@
 """
-Запускается на домашнем ПК. Отвечает на HTTP запросы — бот использует это для проверки статуса.
+Запускается на домашнем ПК. Каждые 20 секунд отправляет UDP-пакет в локальную сеть —
+бот на телефоне получает эти пакеты и знает что ПК включён.
 """
-from http.server import BaseHTTPRequestHandler, HTTPServer
+import socket
+import time
 
+BROADCAST = "192.168.0.255"
 PORT = 7779
+INTERVAL = 20
 
 
-class Handler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write(b"ok")
-
-    def log_message(self, format, *args):
-        pass  # отключаем вывод логов в консоль
+def main():
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        while True:
+            s.sendto(b"alive", (BROADCAST, PORT))
+            time.sleep(INTERVAL)
 
 
 if __name__ == "__main__":
-    server = HTTPServer(("0.0.0.0", PORT), Handler)
-    server.serve_forever()
+    main()
