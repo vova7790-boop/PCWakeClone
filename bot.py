@@ -37,18 +37,21 @@ def authorized_only(handler):
 def send_wol(mac: str) -> None:
     mac_bytes = bytes.fromhex(mac.replace(":", "").replace("-", ""))
     magic = b"\xff" * 6 + mac_bytes * 16
+    # Шлём на оба адреса для надёжности
+    targets = [("<broadcast>", 9), ("192.168.0.255", 9)]
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
         s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        s.sendto(magic, ("<broadcast>", 9))
+        for target in targets:
+            s.sendto(magic, target)
 
 
 def is_online(ip: str) -> bool:
-    result = subprocess.run(
-        ["ping", "-c", "1", "-W", "2", ip],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
-    return result.returncode == 0
+    # Проверяем TCP-порт 135 (Windows RPC) — он активен только когда ОС загружена
+    try:
+        with socket.create_connection((ip, 135), timeout=2):
+            return True
+    except OSError:
+        return False
 
 
 @authorized_only
