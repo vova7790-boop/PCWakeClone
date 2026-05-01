@@ -7,12 +7,14 @@ from functools import wraps
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+from telegram.request import HTTPXRequest
 
 load_dotenv()
 
 BOT_TOKEN = os.environ["BOT_TOKEN"]
 ALLOWED_USER_ID = int(os.environ["ALLOWED_USER_ID"])
 PC_MAC = os.environ["PC_MAC"]
+PROXY = os.environ.get("PROXY")  # необязательный, например socks5://127.0.0.1:1080
 PC_IP = os.environ["PC_IP"]
 
 logging.basicConfig(
@@ -79,7 +81,10 @@ async def cmd_status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 
 
 def main() -> None:
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
+    builder = ApplicationBuilder().token(BOT_TOKEN)
+    if PROXY:
+        builder = builder.proxy(PROXY).get_updates_proxy(PROXY)
+    app = builder.build()
     app.add_handler(CommandHandler("start", cmd_start))
     app.add_handler(CommandHandler("wake", cmd_wake))
     app.add_handler(CommandHandler("status", cmd_status))
