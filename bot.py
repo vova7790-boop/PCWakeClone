@@ -46,9 +46,9 @@ def send_wol(mac: str) -> None:
 
 
 def is_online(ip: str) -> bool:
-    # Проверяем TCP-порт 135 (Windows RPC) — он активен только когда ОС загружена
+    # Порт 445 (SMB) активен только когда Windows полностью загружена
     try:
-        with socket.create_connection((ip, 135), timeout=2):
+        with socket.create_connection((ip, 445), timeout=2):
             return True
     except OSError:
         return False
